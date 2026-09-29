@@ -1,0 +1,26 @@
+{
+  "schema_version": 2,
+  "max_counter_gap_seconds": 180,
+  "min_requests": 10,
+  "baseline_points": 240,
+  "baseline_min_points": 60,
+  "latency_min_run_minutes": 3,
+  "failure_min_run_minutes": 2,
+  "error_ratio_min": 0.1,
+  "error_ratio_excess": 0.05,
+  "error_ratio_multiplier": 3.0,
+  "min_error_count": 3,
+  "severe_error_ratio": 0.4,
+  "timeout_ratio_min": 0.5,
+  "latency_min_increase_seconds": {
+    "dns": 0.005,
+    "web": 0.02,
+    "auth": 0.02
+  },
+  "latency_upper_quantile": 0.95,
+  "latency_upper_multiplier": 1.05,
+  "latency_tail_ratio_min": 0.1,
+  "latency_tail_count_min": 5,
+  "elephant_loss_rate_min": 0.005,
+  "elephant_jitter_seconds_min": 0.005
+}

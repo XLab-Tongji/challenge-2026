@@ -5,17 +5,31 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "aiops-challenge-2026"
 version = "0.1.0"
-description = "Public SDK, evaluator, sample data and baseline for CCF AIOps Challenge 2026"
+description = "CCF AIOps Challenge 2026 SDK, evaluator, and runnable baselines"
 readme = "README.md"
-license = "Apache-2.0"
+license = {text = "Apache-2.0"}
 requires-python = ">=3.10"
 dependencies = []
 
 [project.optional-dependencies]
 llm = ["torch>=2.1", "transformers>=4.40", "accelerate"]
+log = ["drain3"]
+
+[project.scripts]
+aiops-metric-anomalies = "baseline.netcluster.cli.run_metric_anomaly_detection:main"
+aiops-merge-metric-anomalies = "baseline.netcluster.cli.build_optimized_metric_results:main"
+aiops-log-anomalies = "baseline.netcluster.cli.run_log_anomaly_detection:main"
+aiops-traffic-flow-anomalies = "baseline.netcluster.cli.run_traffic_flow_anomaly_detection:main"
+aiops-netflow-anomalies = "baseline.netcluster.cli.run_netflow_5tuple_detection:main"
+aiops-infer-faults = "baseline.netcluster.cli.run_evidence_cluster_state_machine:main"
+aiops-cap-fault-duration = "baseline.netcluster.cli.run_fault_postprocessing:main"
+aiops-sample-baseline = "baseline.bian.sample_runner:main"
 
 [tool.setuptools.packages.find]
-include = ["aiops_challenge_2026*"]
+include = ["aiops_challenge_2026*", "baseline.bian", "baseline.bian.*", "baseline.netcluster", "baseline.netcluster.*"]
+namespaces = true
 
 [tool.setuptools.package-data]
 "aiops_challenge_2026.config" = ["*.json"]
+"baseline.bian" = ["config/*.json"]
+"baseline.netcluster" = ["config/*.json", "config/*.ini"]

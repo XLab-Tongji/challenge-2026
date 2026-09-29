@@ -36,6 +36,7 @@ from localization.ranking import (
     validate_stage2,
 )
 from models.backend import JsonModelBackend, ModelConfig
+from models.backend import OpenAICompatibleJsonBackend
 from preprocessing.evidence import build_event_context, public_topology
 
 
@@ -170,18 +171,38 @@ def _llm_event(
     return top5, category
 
 
-def run(data_root: Path, output: Path, model: str, use_llm: bool, prediction_prefix: str, max_events: int | None = None) -> int:
+def run(
+    data_root: Path,
+    output: Path,
+    model: str | None,
+    use_llm: bool,
+    prediction_prefix: str,
+    max_events: int | None = None,
+    backend_type: str = "local",
+    env_file: Path = Path(".env"),
+) -> int:
     config = _config()
     events = detect(data_root, config["region_aliases"])
     if max_events is not None:
         events = events[:max_events]
     backend = None
     if use_llm:
-        backend = JsonModelBackend(
-            model,
-            ModelConfig(**config["model"]),
-            HERE / "prompts",
-        )
+        model_config = ModelConfig(**config["model"])
+        if backend_type == "openai":
+            backend = OpenAICompatibleJsonBackend.from_env(
+                model,
+                model_config,
+                HERE / "prompts",
+                env_file=env_file,
+            )
+        else:
+            if not model:
+                model = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+            backend = JsonModelBackend(
+                model,
+                model_config,
+                HERE / "prompts",
+            )
     records = []
     for index, event in enumerate(events, 1):
         context = build_event_context(event, config)
@@ -215,17 +236,33 @@ def run(data_root: Path, output: Path, model: str, use_llm: bool, prediction_pre
     return 0
 
 
+def resolve_env_file(path: Path) -> Path:
+    """Resolve relative env files from the repository root."""
+    return path if path.is_absolute() else REPO / path
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--output", type=Path, default=Path("outputs/predictions.jsonl"))
-    parser.add_argument("--model", default="deepseek-ai/DeepSeek-R1-Distill-Qwen-7B")
+    parser.add_argument("--model")
+    parser.add_argument("--backend", choices=("local", "openai"), default="local")
+    parser.add_argument("--env-file", type=Path, default=Path(".env"))
     parser.add_argument("--use-llm", action="store_true")
     parser.add_argument("--prediction-prefix", default="pred_")
     parser.add_argument("--max-events", type=int)
     args = parser.parse_args()
     try:
-        return run(args.data_root, args.output, args.model, args.use_llm, args.prediction_prefix, args.max_events)
+        return run(
+            args.data_root,
+            args.output,
+            args.model,
+            args.use_llm,
+            args.prediction_prefix,
+            args.max_events,
+            args.backend,
+            resolve_env_file(args.env_file),
+        )
     except Exception as exc:
         print(f"Baseline failed: {type(exc).__name__}: {exc}", file=sys.stderr)
         return 1

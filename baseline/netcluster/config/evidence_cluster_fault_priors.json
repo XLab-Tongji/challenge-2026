@@ -1,0 +1,343 @@
+{
+  "version": "evidence-cluster-rca-v1",
+  "source_document": "docs/fault_detection_and_rca_technical_report.md",
+  "fault_priors": {
+    "link_delay": {
+      "direct": {},
+      "effect": {
+        "probe_latency": 0.48,
+        "probe_timeout": 0.25
+      },
+      "applicable_entity_roles": [
+        "br",
+        "cr",
+        "fw"
+      ]
+    },
+    "link_rate_limit": {
+      "direct": {},
+      "effect": {
+        "interface_volume_drop": 0.42,
+        "probe_latency": 0.4,
+        "interface_load_rise": 0.15
+      },
+      "applicable_entity_roles": [
+        "br",
+        "cr",
+        "fw"
+      ]
+    },
+    "link_loss": {
+      "direct": {},
+      "effect": {
+        "interface_volume_drop": 0.43,
+        "regional_return_absence": 0.46,
+        "probe_error": 0.42,
+        "probe_timeout": 0.42
+      },
+      "applicable_entity_roles": [
+        "br",
+        "cr",
+        "fw"
+      ]
+    },
+    "firewall_acl_drop": {
+      "direct": {},
+      "effect": {
+        "regional_return_absence": 0.4,
+        "probe_error": 0.38,
+        "probe_timeout": 0.28
+      },
+      "applicable_entity_roles": [
+        "fw"
+      ]
+    },
+    "firewall_rate_limit": {
+      "direct": {},
+      "effect": {
+        "interface_volume_drop": 0.35,
+        "probe_latency": 0.38,
+        "interface_load_rise": 0.12
+      },
+      "applicable_entity_roles": [
+        "fw"
+      ]
+    },
+    "firewall_port_block": {
+      "direct": {},
+      "effect": {
+        "regional_return_absence": 0.38,
+        "probe_error": 0.38
+      },
+      "applicable_entity_roles": [
+        "fw"
+      ]
+    },
+    "firewall_cpu_pressure": {
+      "direct": {
+        "compute_load": 0.7
+      },
+      "effect": {
+        "probe_latency": 0.3,
+        "interface_load_rise": 0.12
+      },
+      "applicable_entity_roles": [
+        "fw"
+      ]
+    },
+    "firewall_default_route_error": {
+      "direct": {},
+      "effect": {
+        "route_change": 0.28,
+        "regional_return_absence": 0.35,
+        "probe_error": 0.3
+      },
+      "applicable_entity_roles": [
+        "fw"
+      ]
+    },
+    "firewall_rule_order_error": {
+      "direct": {},
+      "effect": {
+        "regional_return_absence": 0.32,
+        "probe_error": 0.3
+      },
+      "applicable_entity_roles": [
+        "fw"
+      ]
+    },
+    "resource_cpu_high": {
+      "direct": {
+        "compute_load": 0.7
+      },
+      "effect": {
+        "probe_latency": 0.26,
+        "interface_load_rise": 0.12
+      },
+      "applicable_entity_roles": [
+        "br",
+        "cr",
+        "traffic",
+        "service"
+      ]
+    },
+    "resource_memory_pressure": {
+      "direct": {
+        "memory_availability_drop": 0.65
+      },
+      "effect": {
+        "process_count_rise": 0.2
+      },
+      "applicable_entity_roles": [
+        "br",
+        "cr",
+        "fw",
+        "traffic",
+        "service"
+      ]
+    },
+    "resource_disk_io_pressure": {
+      "direct": {
+        "disk_io_util_rise": 0.68
+      },
+      "effect": {
+        "disk_activity_rise": 0.38,
+        "probe_latency": 0.2
+      },
+      "applicable_entity_roles": [
+        "br",
+        "cr",
+        "fw",
+        "traffic",
+        "service"
+      ]
+    },
+    "resource_disk_space_low": {
+      "direct": {
+        "disk_capacity_use_rise": 0.55
+      },
+      "effect": {},
+      "applicable_entity_roles": [
+        "br",
+        "cr",
+        "fw",
+        "traffic",
+        "service"
+      ]
+    },
+    "resource_process_pressure": {
+      "direct": {
+        "process_count_rise": 0.55
+      },
+      "effect": {
+        "compute_load": 0.28
+      },
+      "applicable_entity_roles": [
+        "br",
+        "cr",
+        "fw",
+        "traffic",
+        "service"
+      ]
+    },
+    "resource_softirq_udp_pressure": {
+      "direct": {},
+      "effect": {
+        "compute_load": 0.25,
+        "probe_error": 0.24
+      },
+      "applicable_entity_roles": [
+        "br",
+        "cr",
+        "fw",
+        "traffic",
+        "service"
+      ]
+    },
+    "route_blackhole": {
+      "direct": {},
+      "effect": {
+        "route_change": 0.38,
+        "regional_return_absence": 0.48,
+        "probe_error": 0.35
+      },
+      "applicable_entity_roles": [
+        "br",
+        "cr"
+      ]
+    },
+    "route_bgp_session_down": {
+      "direct": {
+        "bgp_session_loss": 0.9
+      },
+      "effect": {
+        "bgp_reset_log": 0.62,
+        "bgp_prefix_loss": 0.54,
+        "probe_error": 0.27
+      },
+      "applicable_entity_roles": [
+        "br"
+      ]
+    },
+    "route_bgp_route_flap": {
+      "direct": {},
+      "effect": {
+        "bgp_prefix_loss": 0.62,
+        "route_change": 0.58,
+        "bgp_reset_log": 0.45,
+        "bgp_control_rise": 0.15
+      },
+      "applicable_entity_roles": [
+        "br"
+      ]
+    },
+    "route_wrong_static_route": {
+      "direct": {},
+      "effect": {
+        "route_change": 0.36,
+        "regional_return_absence": 0.32
+      },
+      "applicable_entity_roles": [
+        "br",
+        "cr"
+      ]
+    },
+    "route_ospf6_neighbor_down": {
+      "direct": {},
+      "effect": {
+        "ospf_send_failure": 0.55,
+        "ospf_control_drop": 0.43,
+        "probe_error": 0.3
+      },
+      "applicable_entity_roles": [
+        "br",
+        "cr"
+      ]
+    },
+    "route_ospf6_cost_anomaly": {
+      "direct": {
+        "ospf_cost_rise": 0.82
+      },
+      "effect": {
+        "route_change": 0.44,
+        "probe_latency": 0.3
+      },
+      "applicable_entity_roles": [
+        "br",
+        "cr"
+      ]
+    },
+    "route_wrong_default_route": {
+      "direct": {},
+      "effect": {
+        "route_change": 0.36,
+        "regional_return_absence": 0.32,
+        "probe_error": 0.25
+      },
+      "applicable_entity_roles": [
+        "br",
+        "cr"
+      ]
+    },
+    "service_dns_down": {
+      "direct": {},
+      "effect": {
+        "probe_error": 0.5,
+        "probe_timeout": 0.5
+      },
+      "applicable_entity_roles": [
+        "service"
+      ]
+    },
+    "service_dns_wrong_record": {
+      "direct": {},
+      "effect": {
+        "probe_error": 0.2
+      },
+      "applicable_entity_roles": [
+        "service"
+      ]
+    },
+    "service_web_5xx": {
+      "direct": {},
+      "effect": {
+        "probe_error": 0.38
+      },
+      "applicable_entity_roles": [
+        "service"
+      ]
+    },
+    "service_web_slow": {
+      "direct": {},
+      "effect": {
+        "probe_latency": 0.58,
+        "probe_timeout": 0.38
+      },
+      "applicable_entity_roles": [
+        "service"
+      ]
+    },
+    "service_auth_timeout": {
+      "direct": {},
+      "effect": {
+        "probe_timeout": 0.55,
+        "probe_latency": 0.32
+      },
+      "applicable_entity_roles": [
+        "service"
+      ]
+    },
+    "service_auth_error": {
+      "direct": {},
+      "effect": {
+        "probe_error": 0.4
+      },
+      "applicable_entity_roles": [
+        "service"
+      ]
+    }
+  },
+  "unknown_relation": 0.05,
+  "single_relative_resource_confidence_cap": 0.45,
+  "effect_only_confidence_cap": 0.55
+}

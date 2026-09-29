@@ -1,0 +1,217 @@
+{
+  "schema_version": 2,
+  "description": "Metric classification and anomaly-detection rules. Rules are applied in order and later matches override earlier matches.",
+  "defaults": {
+    "workflow": "numeric",
+    "metric_type": "continuous",
+    "numeric_tail": "two_sided",
+    "decomposition": "auto",
+    "numeric_detectors": "ecod",
+    "anomaly_fraction": 0.003,
+    "n_sigma": 8.0,
+    "state_distinct_value_limit": 4,
+    "state_dominant_ratio": 0.95,
+    "counter_to_increment": false
+  },
+  "missing_detection": {
+    "enabled": true,
+    "history_window_minutes": 360,
+    "history_min_valid_ratio": 0.8,
+    "max_missing_duration_minutes": 60,
+    "all_missing_action": "skip",
+    "constant_series_action": "skip",
+    "merge_consecutive_points": false
+  },
+  "rules": [
+    {
+      "match": "*.node_metrics.*",
+      "workflow": "numeric",
+      "metric_type": "continuous",
+      "tail": "two_sided",
+      "anomaly_fraction": 0.003,
+      "n_sigma": 8.0
+    },
+    {"match": "*.node_metrics.cpu_usage", "tail": "upper", "n_sigma": 12.0, "numeric_detectors": "both", "mad_floor": 2.0, "mad_relative_floor": 0.15, "mad_z_threshold": 8.0, "mad_min_run_points": 3},
+    {"match": "*.node_metrics.load1", "tail": "upper", "numeric_detectors": "mad", "mad_floor": 0.3, "mad_relative_floor": 0.15, "mad_z_threshold": 6.0},
+    {"match": "*.node_metrics.load5", "tail": "upper", "numeric_detectors": "mad", "mad_floor": 0.3, "mad_relative_floor": 0.15, "mad_z_threshold": 6.0},
+    {"match": "*.node_metrics.memory_available_ratio", "tail": "lower", "n_sigma": 10.0, "numeric_detectors": "both", "mad_floor": 0.005, "mad_relative_floor": 0.0, "min_absolute_change": 0.02},
+    {"match": "*.node_metrics.swap_used_ratio", "tail": "upper", "numeric_detectors": "mad", "mad_floor": 0.01, "mad_relative_floor": 0.1},
+    {"match": "*.node_metrics.disk_read_rate", "tail": "upper", "anomaly_fraction": 0.003, "n_sigma": 12.0},
+    {"match": "*.node_metrics.disk_write_rate", "tail": "upper", "anomaly_fraction": 0.002, "n_sigma": 8.0},
+    {"match": "*.node_metrics.disk_io_util", "tail": "upper", "n_sigma": 12.0, "numeric_detectors": "both", "mad_floor": 5.0, "mad_relative_floor": 0.15, "min_absolute_change": 15.0},
+    {"match": "*.node_metrics.filesystem_used_ratio", "tail": "upper", "n_sigma": 12.0, "numeric_detectors": "both", "mad_floor": 0.005, "mad_relative_floor": 0.0, "min_absolute_change": 0.005},
+    {"match": "*.node_metrics.inode_used_ratio", "tail": "upper", "n_sigma": 12.0, "numeric_detectors": "both", "mad_floor": 0.005, "mad_relative_floor": 0.0, "min_absolute_change": 0.0005},
+    {"match": "*.node_metrics.open_fd_ratio", "tail": "upper", "numeric_detectors": "mad", "mad_floor": 0.005, "mad_relative_floor": 0.25},
+    {"match": "*.node_metrics.process_count", "metric_type": "discrete", "tail": "upper", "numeric_detectors": "mad", "mad_floor": 5.0, "mad_relative_floor": 0.08},
+
+    {
+      "match": "*.interface_metrics.*",
+      "workflow": "numeric",
+      "metric_type": "continuous",
+      "tail": "two_sided",
+      "anomaly_fraction": 0.003,
+      "n_sigma": 8.0
+    },
+    {
+      "match": "*.interface_metrics.*_if_role",
+      "enabled": false,
+      "metric_type": "metadata",
+      "reason": "Interface role is a descriptive label, not a monitored value."
+    },
+    {"match": "*.interface_metrics.*_rx_bytes_rate", "tail": "two_sided", "anomaly_fraction": 0.003, "n_sigma": 12.0},
+    {"match": "*.interface_metrics.*_tx_bytes_rate", "tail": "two_sided", "anomaly_fraction": 0.003, "n_sigma": 12.0},
+    {"match": "*.interface_metrics.*_rx_packets_rate", "tail": "two_sided", "anomaly_fraction": 0.003, "n_sigma": 12.0},
+    {"match": "*.interface_metrics.*_tx_packets_rate", "tail": "two_sided", "anomaly_fraction": 0.003, "n_sigma": 12.0},
+    {"match": "*.interface_metrics.*_rx_drop_rate", "tail": "upper", "numeric_detectors": "mad", "mad_floor": 0.1, "mad_relative_floor": 0.3},
+    {"match": "*.interface_metrics.*_tx_drop_rate", "tail": "upper", "numeric_detectors": "mad", "mad_floor": 0.1, "mad_relative_floor": 0.3},
+    {"match": "*.interface_metrics.*_rx_error_rate", "tail": "upper", "numeric_detectors": "mad", "mad_floor": 0.1, "mad_relative_floor": 0.3},
+    {"match": "*.interface_metrics.*_tx_error_rate", "tail": "upper", "numeric_detectors": "mad", "mad_floor": 0.1, "mad_relative_floor": 0.3},
+    {
+      "match": "*.interface_metrics.*_carrier_changes",
+      "metric_type": "discrete",
+      "tail": "upper",
+      "anomaly_fraction": 0.003,
+      "n_sigma": 12.0,
+      "counter_to_increment": false
+    },
+
+    {
+      "match": "*.routing_metrics.*",
+      "workflow": "numeric",
+      "metric_type": "continuous",
+      "tail": "two_sided",
+      "anomaly_fraction": 0.003,
+      "n_sigma": 8.0
+    },
+    {
+      "match": "*.routing_metrics.bgp_command_success*",
+      "workflow": "state",
+      "metric_type": "state",
+      "normal_values": ["1"]
+    },
+    {"match": "*.routing_metrics.bgp_peer_count*", "metric_type": "discrete", "tail": "lower", "numeric_detectors": "mad", "mad_floor": 1.0, "mad_relative_floor": 0.2},
+    {
+      "match": "*.routing_metrics.bgp_peer_up*",
+      "workflow": "state",
+      "metric_type": "state",
+      "normal_values": ["1"]
+    },
+    {
+      "match": "*.routing_metrics.bgp_peer_uptime_seconds*",
+      "workflow": "numeric",
+      "metric_type": "continuous",
+      "tail": "lower",
+      "anomaly_fraction": 0.003,
+      "n_sigma": 12.0,
+      "counter_to_increment": false
+    },
+    {"match": "*.routing_metrics.bgp_peer_prefix_received*", "metric_type": "discrete", "tail": "lower", "numeric_detectors": "both", "mad_floor": 1.0, "mad_relative_floor": 0.2},
+    {"match": "*.routing_metrics.bgp_peer_prefix_sent*", "metric_type": "discrete", "tail": "lower", "numeric_detectors": "mad", "mad_floor": 1.0, "mad_relative_floor": 0.2},
+    {
+      "match": "*.routing_metrics.bgp_peer_prefix_*__*state%3D%22Idle%20%28Admin%29%22*",
+      "workflow": "state",
+      "metric_type": "state",
+      "normal_is_null": true,
+      "failure_regex": ".+",
+      "missing_detection_enabled": false,
+      "reason": "This label-specific series is normally empty; any non-empty value is abnormal."
+    },
+    {
+      "match": "*.routing_metrics.ipv6_route_change_total*",
+      "metric_type": "discrete",
+      "tail": "upper",
+      "anomaly_fraction": 0.003,
+      "n_sigma": 12.0,
+      "counter_to_increment": false
+    },
+    {
+      "match": "*.routing_metrics.ipv6_default_route_changed_total*",
+      "metric_type": "discrete",
+      "tail": "upper",
+      "anomaly_fraction": 0.003,
+      "n_sigma": 8.0,
+      "counter_to_increment": false
+    },
+    {"match": "*.routing_metrics.ipv6_route_count*", "metric_type": "discrete", "tail": "two_sided", "numeric_detectors": "mad", "mad_floor": 1.0, "mad_relative_floor": 0.2},
+    {
+      "match": "*.routing_metrics.ipv6_route_exists*",
+      "workflow": "state",
+      "metric_type": "state",
+      "normal_values": ["1"]
+    },
+    {
+      "match": "*.routing_metrics.ipv6_default_route_info*",
+      "workflow": "state",
+      "metric_type": "state",
+      "normal_values": ["1"],
+      "reason": "Value 1 means the label-described default-route record exists; a short disappearance is handled by missing detection."
+    },
+    {
+      "match": "*.routing_metrics.ipv6_route_nexthop_info*",
+      "workflow": "state",
+      "metric_type": "state",
+      "normal_values": ["1"],
+      "reason": "Value 1 means the label-described nexthop record exists; a short disappearance is handled by missing detection."
+    },
+    {"match": "*.routing_metrics.ospf6_interface_cost*", "metric_type": "discrete", "tail": "two_sided", "numeric_detectors": "mad", "mad_floor": 1.0, "mad_relative_floor": 0.25},
+    {
+      "match": "*.routing_metrics.ospf6_interface_enabled*",
+      "workflow": "state",
+      "metric_type": "state",
+      "normal_values": ["1"]
+    },
+    {
+      "match": "*.routing_metrics.ospf6_interface_enabled*virbr0*",
+      "workflow": "state",
+      "metric_type": "state",
+      "normal_values": ["0"]
+    },
+    {
+      "match": "*.routing_metrics.ospf6_neighbor_state_code*",
+      "workflow": "state",
+      "metric_type": "state",
+      "normal_values": ["6"],
+      "reason": "Fallback for unlabeled or other OSPFv3 neighbor-state series; Full is encoded as 6."
+    },
+    {
+      "match": "*.routing_metrics.ospf6_neighbor_state_code*state%3D%22Full%22*",
+      "workflow": "state",
+      "metric_type": "state",
+      "normal_values": ["6"],
+      "reason": "A series labeled Full is normal when its state code is 6."
+    },
+    {
+      "match": "*.routing_metrics.ospf6_neighbor_state_code*state%3D%22Twoway%22*",
+      "workflow": "state",
+      "metric_type": "state",
+      "normal_values": ["2"],
+      "reason": "A stable TwoWay adjacency can be normal on broadcast networks when the routers are not DR/BDR peers."
+    },
+
+    {
+      "match": "*.scrape_health.*",
+      "workflow": "numeric",
+      "metric_type": "continuous",
+      "tail": "two_sided",
+      "anomaly_fraction": 0.003,
+      "n_sigma": 8.0
+    },
+    {
+      "match": "*.scrape_health.*scrape_up",
+      "workflow": "state",
+      "metric_type": "state",
+      "normal_values": ["1"]
+    },
+    {
+      "match": "*.scrape_health.*scrape_error",
+      "workflow": "state",
+      "metric_type": "state",
+      "normal_is_null": true,
+      "failure_regex": ".+",
+      "missing_detection_enabled": false,
+      "reason": "Scrape error is normally empty; any non-empty error text is abnormal."
+    },
+    {"match": "*.scrape_health.*scrape_duration_seconds", "metric_type": "continuous", "tail": "upper", "numeric_detectors": "mad", "mad_floor": 0.1, "mad_relative_floor": 0.5},
+    {"match": "*.scrape_health.*scrape_samples", "metric_type": "discrete", "tail": "lower", "numeric_detectors": "mad", "mad_floor": 1.0, "mad_relative_floor": 0.2, "min_relative_change": 0.02}
+  ]
+}

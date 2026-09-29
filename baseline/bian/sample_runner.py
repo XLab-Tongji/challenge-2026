@@ -11,8 +11,13 @@ import sys
 import tempfile
 
 
-REPO = Path(__file__).resolve().parents[1]
+REPO = Path(__file__).resolve().parents[2]
 CASES = ("case_001", "case_002", "case_003")
+
+
+def resolve_env_file(path: Path) -> Path:
+    """Resolve relative env files from the repository root."""
+    return path if path.is_absolute() else REPO / path
 
 
 def _read_jsonl(path: Path, *, allow_unknown_category: bool = False) -> list[dict]:
@@ -67,13 +72,16 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--use-llm", action="store_true")
     parser.add_argument(
-        "--model", default="deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+        "--model"
     )
+    parser.add_argument("--backend", choices=("local", "openai"), default="local")
+    parser.add_argument("--env-file", type=Path, default=Path(".env"))
     args = parser.parse_args()
 
     if args.output.exists():
         raise SystemExit("output path already exists")
     args.output.parent.mkdir(parents=True, exist_ok=True)
+    env_file = resolve_env_file(args.env_file)
     with tempfile.TemporaryDirectory(prefix="aiops_baseline_") as temporary:
         run_dir = Path(temporary)
         for case_name in CASES:
@@ -89,7 +97,9 @@ def main() -> int:
                 f"{case_name}_",
             ]
             if args.use_llm:
-                command.extend(["--use-llm", "--model", args.model])
+                command.extend(["--use-llm", "--backend", args.backend, "--env-file", str(env_file)])
+                if args.model:
+                    command.extend(["--model", args.model])
             try:
                 subprocess.run(command, cwd=REPO, check=True)
             except subprocess.CalledProcessError as exc:

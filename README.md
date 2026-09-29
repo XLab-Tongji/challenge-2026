@@ -1,81 +1,62 @@
 # AIOps Challenge 2026
 
-本仓库提供 AIOps Challenge 2026 的样例数据、评测工具和参考 Baseline。
+本仓库保留赛事 SDK 与评测器、BiAn 和 NetCluster 两套 Baseline，以及最新一轮的异常检测和提交结果。
+
+## 目录
+
+| 路径 | 内容 |
+| --- | --- |
+| `aiops_challenge_2026/` | 数据接口、公开配置和本地评测器 |
+| `baseline/bian/` | BiAn 参考 Baseline 和样例运行入口 |
+| `baseline/netcluster/` | 四类异常检测、双态故障检测与根因推理、30 分钟长度裁剪 |
+| `data/processed/`、`data/updated/` | 处理后数据和更新数据 |
+| `outputs/metric_anomalies/`、`outputs/log_anomalies/` | 最新指标、日志异常结果 |
+| `outputs/traffic_flow_anomalies/`、`outputs/netflow_anomalies/` | 最新 Traffic Flow、NetFlow 异常结果 |
+| `outputs/submission/raw/`、`outputs/submission/result/` | 最新故障推理中间结果和裁剪结果 |
+| `submission/predictions.jsonl` | 当前可提交文件；同目录提供提交和查分脚本 |
+| `scripts/` | 原始数据预处理脚本 |
+| `docs/` | 元数据、异常检测、故障检测与根因推理技术报告 |
+| `examples/`、`sample/` | 官方示例与样例数据，内容保持不变 |
 
 ## 安装
 
 ```bash
-python -m pip install .
+python -m pip install -e .
+python -m pip install -e ".[log]"  # 运行日志检测时需要 Drain3
+python -m pip install -e ".[llm]"  # 运行 BiAn 的 LLM 路径时需要
 ```
 
-运行 7B 模型时另安装：
+## 复现 NetCluster 结果
+
+以下命令在仓库根目录运行。现有四类最新异常结果已经位于 `outputs/`，可以直接从故障推理步骤开始。
 
 ```bash
-python -m pip install ".[llm]"
+python -m baseline.netcluster.cli.run_evidence_cluster_state_machine
+python -m baseline.netcluster.cli.run_fault_postprocessing
 ```
 
-## 样例数据
+故障推理读取四类 `evidence_events.jsonl` 和 `observation_coverage.jsonl`。后处理只对超过 30 分钟的故障按证据裁剪，不合并、补报或按故障间隔筛选。将 `outputs/submission/result/predictions.jsonl` 复制为 `submission/predictions.jsonl` 即得到当前提交文件。
 
-`sample/` 提供 3 个可直接运行的样例 case，每个 case 包含 8 个城市区域的多源网络观测数据。
-
-## 示例
-
-预测结果示例见 `examples/predictions.jsonl`。
-
-## 运行 Baseline
-
-### 快速验证
-
-未配置 LLM 权重时，可运行：
+如需重新检测异常，运行各模块入口：
 
 ```bash
-python tools/run_sample_baseline.py \
-  --output outputs/quick_validation_predictions.jsonl
+python -m baseline.netcluster.cli.run_metric_anomaly_detection
+python -m baseline.netcluster.cli.build_optimized_metric_results
+python -m baseline.netcluster.cli.run_log_anomaly_detection
+python -m baseline.netcluster.cli.run_traffic_flow_anomaly_detection
+python -m baseline.netcluster.cli.run_netflow_5tuple_detection --data-root data/updated/first_stage --output-dir outputs/netflow_anomalies
 ```
 
-该模式用于快速检查数据读取、结果生成和本地评测流程。快速验证模式仅用于流程检查，其输出不作为比赛提交结果。
+指标检测先生成完整基础结果，再把调参的指标与未改动指标拼接；日志检测需要 `.[log]`。各入口可用 `--help` 查看参数。
 
-### BiAn Baseline
-
-本仓库提供基于 BiAn 方法实现的参考 Baseline。BiAn 方法来源于论文 [Towards LLM-Based Failure Localization in Production-Scale Networks](https://doi.org/10.1145/3718958.3750505)。
-
-本实现结合 AIOps Challenge 2026 的数据组织方式、任务接口和结果输出进行了相应适配。为便于参赛者理解赛题数据的使用方式，并展示从多源数据读取、分析，到根因定位、故障分类、结构化结果输出及本地评测的完整流程，公开参考实现对原始方法进行了适当简化，并采用轻量级 7B 模型以降低运行资源要求。该 Baseline 主要用于展示完整的数据处理与评测流程，供参赛者参考，不代表 BiAn 方法的完整实现或最佳性能，也并非针对本赛题进行性能优化。
+## 验证与提交
 
 ```bash
-python tools/run_sample_baseline.py \
-  --use-llm \
-  --model <MODEL_PATH_OR_ID> \
-  --output outputs/bian_predictions.jsonl
+python -m pytest tests
+python -m aiops_challenge_2026.evaluator --ground-truth sample/ground_truth.jsonl --predictions examples/predictions.jsonl
+python submission/submit.py submission/predictions.jsonl
 ```
 
-模型参数可使用本地权重目录或兼容的模型 ID；参考配置使用 `DeepSeek-R1-Distill-Qwen-7B`。
+样例真值仅适用于 `sample/` 的示例预测，不能用于评估完整测试集的得分。实际提交会访问评测服务器；查看提交状态使用 `python submission/check_score.py <SUBMISSION_ID>`。
 
-## 本地评测
-
-仓库提供本地评测工具，可用于验证预测结果：
-
-```bash
-python -m aiops_challenge_2026.evaluator \
-  --ground-truth sample/ground_truth.jsonl \
-  --predictions outputs/bian_predictions.jsonl
-```
-
-`examples/predictions.jsonl` 可用于演示评测工具的使用方式，不代表 Baseline 性能。
-
-时间戳必须包含时区信息，推荐统一使用 UTC。
-
-## 目录结构
-
-```text
-aiops_challenge_2026/  公开配置、数据读取与评测工具
-baseline/bian/         BiAn 参考 Baseline
-examples/              预测结果示例
-sample/                公开样例数据及参考答案
-tools/                 Baseline 运行工具
-```
-
-## 参考文献
-
-Wang C, Zhang X, Lu R, et al. Towards LLM-Based Failure Localization in Production-Scale Networks[C]//Proceedings of the ACM SIGCOMM 2025 Conference. 2025: 496-511.
-
-论文链接：https://doi.org/10.1145/3718958.3750505
+技术细节见 [异常检测技术报告](docs/anomaly_detection_technical_report.md) 和[故障检测与根因推理技术报告](docs/fault_detection_and_rca_technical_report.md)。BiAn 参考方法见 [Towards LLM-Based Failure Localization in Production-Scale Networks](https://doi.org/10.1145/3718958.3750505)。

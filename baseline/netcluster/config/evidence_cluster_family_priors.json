@@ -1,0 +1,882 @@
+{
+  "version": "evidence-cluster-family-v2",
+  "temporal_feature_weights": {
+    "load5": 0.4
+  },
+  "source_document": "docs/fault_detection_and_rca_technical_report.md",
+  "event_name_rules": {
+    "metric.interface_rate_down": {
+      "modality": "metric",
+      "feature_any": [
+        "rx_bytes_rate",
+        "tx_bytes_rate",
+        "rx_packets_rate",
+        "tx_packets_rate"
+      ],
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "down",
+      "limitation": "An interface rate decline is a symptom, not proof of rate limiting or loss.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 22,
+      "score_kind_any": [
+        "ecod_tail_log_score"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "metric.cpu_up": {
+      "modality": "metric",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "limitation": "Relative anomaly only; observed values conflict with the 0-1 unit stated in system_metadata.md, so no absolute saturation cutoff is assumed.",
+      "feature": "cpu_usage",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 4252,
+      "score_kind_any": [
+        "ecod_tail_log_score",
+        "local_mad_z",
+        "max_ecod_tail_log_or_local_mad_z"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "metric.load_up": {
+      "modality": "metric",
+      "feature_any": [
+        "load1",
+        "load5"
+      ],
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 1377,
+      "score_kind_any": [
+        "local_mad_z"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "metric.memory_down": {
+      "modality": "metric",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "down",
+      "feature": "memory_available_ratio",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 516,
+      "score_kind_any": [
+        "ecod_tail_log_score",
+        "local_mad_z",
+        "max_ecod_tail_log_or_local_mad_z"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "metric.disk_util_up": {
+      "modality": "metric",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "limitation": "Relative increase does not establish absolute I/O saturation.",
+      "feature": "disk_io_util",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 3577,
+      "score_kind_any": [
+        "ecod_tail_log_score",
+        "local_mad_z",
+        "max_ecod_tail_log_or_local_mad_z"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "metric.disk_rate_up": {
+      "modality": "metric",
+      "feature_any": [
+        "disk_read_rate",
+        "disk_write_rate"
+      ],
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 3578,
+      "score_kind_any": [
+        "ecod_tail_log_score"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "metric.disk_space_up": {
+      "modality": "metric",
+      "feature_any": [
+        "filesystem_used_ratio",
+        "inode_used_ratio"
+      ],
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "limitation": "Relative increase does not establish that free space is low.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 1925,
+      "score_kind_any": [
+        "ecod_tail_log_score",
+        "local_mad_z",
+        "max_ecod_tail_log_or_local_mad_z"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "metric.process_up": {
+      "modality": "metric",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "limitation": "Process count alone does not establish process pressure.",
+      "feature": "process_count",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 103,
+      "score_kind_any": [
+        "local_mad_z"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "metric.route_absent_background": {
+      "modality": "metric",
+      "requires_observed": true,
+      "fault_support_enabled": false,
+      "anomaly_kind": "state_anomaly",
+      "attributes_raw_value_equals": 0,
+      "limitation": "All 40,320 observed events are the same prefix on two routers for the complete 14-day interval; exclude until a new transition or verified expected-route reference exists.",
+      "feature": "ipv6_route_exists",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 40320,
+      "score_kind_any": [
+        "state_rule_indicator"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "metric.route_change": {
+      "modality": "metric",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "feature": "ipv6_route_change_total",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 1943,
+      "score_kind_any": [
+        "ecod_tail_log_score"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "metric.bgp_down": {
+      "modality": "metric",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "anomaly_kind": "state_anomaly",
+      "attributes_raw_value_equals": 0,
+      "limitation": "A zero state must be observed; NULL collection events do not match.",
+      "feature": "bgp_peer_up",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 497,
+      "score_kind_any": [
+        "state_rule_indicator"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "metric.bgp_uptime_down": {
+      "modality": "metric",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "down",
+      "feature": "bgp_peer_uptime_seconds",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 775,
+      "score_kind_any": [
+        "ecod_tail_log_score"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "metric.bgp_prefix_down": {
+      "modality": "metric",
+      "feature_any": [
+        "bgp_peer_prefix_received",
+        "bgp_peer_prefix_sent"
+      ],
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "down",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 482,
+      "score_kind_any": [
+        "ecod_tail_log_score",
+        "local_mad_z",
+        "max_ecod_tail_log_or_local_mad_z"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "metric.ospf_cost_up": {
+      "modality": "metric",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "feature": "ospf6_interface_cost",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 48,
+      "score_kind_any": [
+        "local_mad_z"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "log.bgp_session_reset": {
+      "modality": "log",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "anomaly_kind": "routing_log_event",
+      "attributes_template_id_any": [
+        "8"
+      ],
+      "feature": "bgp_session_reset",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 37,
+      "score_kind_any": [
+        "log_count"
+      ],
+      "source_output": "outputs/log_anomalies/evidence_events.jsonl"
+    },
+    "log.ospf6_send_failure": {
+      "modality": "log",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "anomaly_kind": "routing_log_event",
+      "attributes_template_id_any": [
+        "6",
+        "7"
+      ],
+      "limitation": "OSPF send errors do not establish neighbor state.",
+      "feature": "ospf6_send_failure",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 148,
+      "score_kind_any": [
+        "log_count"
+      ],
+      "source_output": "outputs/log_anomalies/evidence_events.jsonl"
+    },
+    "traffic.request_error_up": {
+      "modality": "traffic_flow",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "feature": "request_error_ratio",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 1772,
+      "score_kind_any": [
+        "error_fraction"
+      ],
+      "source_output": "outputs/traffic_flow_anomalies/evidence_events.jsonl"
+    },
+    "traffic.batch_timeout_up": {
+      "modality": "traffic_flow",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "feature": "batch_timeout_ratio",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 777,
+      "score_kind_any": [
+        "timeout_fraction"
+      ],
+      "source_output": "outputs/traffic_flow_anomalies/evidence_events.jsonl"
+    },
+    "traffic.latency_p95_up": {
+      "modality": "traffic_flow",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "feature": "latency_p95_seconds",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 71,
+      "score_kind_any": [
+        "threshold_ratio"
+      ],
+      "source_output": "outputs/traffic_flow_anomalies/evidence_events.jsonl"
+    },
+    "netflow.interface_bytes_down": {
+      "modality": "netflow",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "down",
+      "limitation": "Measured at the exporting router and interface; normal demand changes can also reduce bytes.",
+      "feature": "interface_bytes",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 67,
+      "score_kind_any": [
+        "relative_change"
+      ],
+      "source_output": "outputs/netflow_anomalies/evidence_events.jsonl"
+    },
+    "netflow.regional_opposite_absent": {
+      "modality": "netflow",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "absent",
+      "anomaly_kind": "opposite_direction_absence",
+      "limitation": "Opposite flow absence at a router is not proof of request failure, firewall blocking, or physical path loss.",
+      "feature": "regional_opposite_presence",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 4043,
+      "score_kind_any": [
+        "relative_change"
+      ],
+      "source_output": "outputs/netflow_anomalies/evidence_events.jsonl"
+    },
+    "netflow.ospf_control_down": {
+      "modality": "netflow",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "down",
+      "attributes_protocol": "89",
+      "limitation": "OSPF packet count is not OSPF neighbor state.",
+      "feature": "control_packets",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 0,
+      "score_kind_any": [
+        "relative_change"
+      ],
+      "source_output": "outputs/netflow_anomalies/evidence_events.jsonl"
+    },
+    "metric.interface_rate_up": {
+      "modality": "metric",
+      "feature_any": [
+        "rx_bytes_rate",
+        "tx_bytes_rate",
+        "rx_packets_rate",
+        "tx_packets_rate"
+      ],
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "limitation": "High interface traffic is load context; it does not identify a fault or rate limit.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 23322,
+      "score_kind_any": [
+        "ecod_tail_log_score"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "metric.bgp_prefix_zero": {
+      "modality": "metric",
+      "feature": "bgp_peer_prefix_received",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "anomaly_kind": "state_anomaly",
+      "attributes_raw_value_equals": 0.0,
+      "limitation": "Observed zero prefixes can accompany an administratively idle peer; correlate with peer_up and logs.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 250,
+      "score_kind_any": [
+        "state_rule_indicator"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl"
+    },
+    "netflow.interface_bytes_up": {
+      "modality": "netflow",
+      "feature": "interface_bytes",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "limitation": "TCP bytes increased at an observed router interface; not a validated UDP-pressure or link-capacity measurement.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 282,
+      "score_kind_any": [
+        "relative_change"
+      ],
+      "source_output": "outputs/netflow_anomalies/evidence_events.jsonl"
+    },
+    "netflow.bgp_control_up": {
+      "modality": "netflow",
+      "feature": "control_packets",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "attributes_protocol": "6",
+      "limitation": "TCP/179 packet increase is control traffic context, not a BGP session state.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 3,
+      "score_kind_any": [
+        "relative_change"
+      ],
+      "source_output": "outputs/netflow_anomalies/evidence_events.jsonl"
+    },
+    "netflow.ospf_control_up": {
+      "modality": "netflow",
+      "feature": "control_packets",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "direction": "up",
+      "attributes_protocol": "89",
+      "limitation": "OSPF packet increase is control traffic context, not a neighbor state.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 19,
+      "score_kind_any": [
+        "relative_change"
+      ],
+      "source_output": "outputs/netflow_anomalies/evidence_events.jsonl"
+    },
+    "collection.node_scrape_up_zero": {
+      "modality": "metric",
+      "feature": "node_exporter__scrape_up",
+      "requires_observed": true,
+      "fault_support_enabled": false,
+      "anomaly_kind": "state_anomaly",
+      "attributes_raw_value_equals": 0.0,
+      "limitation": "Collection quality context; can open an untyped suspect but cannot by itself identify a fault subtype.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 435,
+      "score_kind_any": [
+        "state_rule_indicator"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl",
+      "generic_candidate_trigger": true
+    },
+    "collection.node_scrape_error": {
+      "modality": "metric",
+      "feature": "node_exporter__scrape_error",
+      "requires_observed": true,
+      "fault_support_enabled": false,
+      "anomaly_kind": "state_anomaly",
+      "attributes_raw_value_equals": "target_down",
+      "limitation": "Collection quality context; can open an untyped suspect but cannot by itself identify a fault subtype.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 435,
+      "score_kind_any": [
+        "state_rule_indicator"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl",
+      "generic_candidate_trigger": true
+    },
+    "collection.node_scrape_samples_down": {
+      "modality": "metric",
+      "feature": "node_exporter__scrape_samples",
+      "requires_observed": true,
+      "fault_support_enabled": false,
+      "direction": "down",
+      "limitation": "Collection quality context; can open an untyped suspect but cannot by itself identify a fault subtype.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 2198,
+      "score_kind_any": [
+        "local_mad_z"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl",
+      "generic_candidate_trigger": true
+    },
+    "collection.node_scrape_duration_up": {
+      "modality": "metric",
+      "feature": "node_exporter__scrape_duration_seconds",
+      "requires_observed": true,
+      "fault_support_enabled": false,
+      "direction": "up",
+      "limitation": "Collection quality context; can open an untyped suspect but cannot by itself identify a fault subtype.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 249,
+      "score_kind_any": [
+        "local_mad_z"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl",
+      "generic_candidate_trigger": true
+    },
+    "collection.routing_scrape_up_zero": {
+      "modality": "metric",
+      "feature": "routing_exporter__scrape_up",
+      "requires_observed": true,
+      "fault_support_enabled": false,
+      "anomaly_kind": "state_anomaly",
+      "attributes_raw_value_equals": 0.0,
+      "limitation": "Collection quality context; can open an untyped suspect but cannot by itself identify a fault subtype.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 417,
+      "score_kind_any": [
+        "state_rule_indicator"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl",
+      "generic_candidate_trigger": true
+    },
+    "collection.routing_scrape_error": {
+      "modality": "metric",
+      "feature": "routing_exporter__scrape_error",
+      "requires_observed": true,
+      "fault_support_enabled": false,
+      "anomaly_kind": "state_anomaly",
+      "attributes_raw_value_equals": "target_down",
+      "limitation": "Collection quality context; can open an untyped suspect but cannot by itself identify a fault subtype.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 417,
+      "score_kind_any": [
+        "state_rule_indicator"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl",
+      "generic_candidate_trigger": true
+    },
+    "collection.routing_scrape_samples_down": {
+      "modality": "metric",
+      "feature": "routing_exporter__scrape_samples",
+      "requires_observed": true,
+      "fault_support_enabled": false,
+      "direction": "down",
+      "limitation": "Collection quality context; can open an untyped suspect but cannot by itself identify a fault subtype.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 417,
+      "score_kind_any": [
+        "local_mad_z"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl",
+      "generic_candidate_trigger": true
+    },
+    "collection.routing_scrape_duration_up": {
+      "modality": "metric",
+      "feature": "routing_exporter__scrape_duration_seconds",
+      "requires_observed": true,
+      "fault_support_enabled": false,
+      "direction": "up",
+      "limitation": "Collection quality context; can open an untyped suspect but cannot by itself identify a fault subtype.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 114,
+      "score_kind_any": [
+        "local_mad_z"
+      ],
+      "source_output": "outputs/metric_anomalies/evidence_events.jsonl",
+      "generic_candidate_trigger": true
+    },
+    "traffic.latency_tail_up": {
+      "modality": "traffic_flow",
+      "feature": "latency_tail_ratio",
+      "direction": "up",
+      "anomaly_kind": "degradation",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 25,
+      "score_kind_any": [
+        "tail_fraction"
+      ],
+      "source_output": "outputs/traffic_flow_anomalies/evidence_events.jsonl"
+    },
+    "traffic.elephant_jitter_up": {
+      "modality": "traffic_flow",
+      "feature": "elephant_jitter_seconds",
+      "direction": "up",
+      "anomaly_kind": "degradation",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 4,
+      "score_kind_any": [
+        "seconds"
+      ],
+      "source_output": "outputs/traffic_flow_anomalies/evidence_events.jsonl"
+    },
+    "traffic.elephant_loss_up": {
+      "modality": "traffic_flow",
+      "feature": "elephant_loss_rate",
+      "direction": "up",
+      "anomaly_kind": "degradation",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 2,
+      "score_kind_any": [
+        "loss_fraction"
+      ],
+      "source_output": "outputs/traffic_flow_anomalies/evidence_events.jsonl"
+    },
+    "netflow.small_udp_packets_up": {
+      "modality": "netflow",
+      "feature": "interface_udp_small_packets",
+      "direction": "up",
+      "anomaly_kind": "volume_change",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "limitation": "Small UDP packet growth is traffic load context and does not establish a flood, rate limit, or failing router.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 82,
+      "score_kind_any": [
+        "relative_change"
+      ],
+      "source_output": "outputs/netflow_anomalies/evidence_events.jsonl"
+    },
+    "netflow.region_port_bytes_down": {
+      "modality": "netflow",
+      "feature": "region_port_bytes",
+      "direction": "down",
+      "anomaly_kind": "volume_change",
+      "requires_observed": true,
+      "fault_support_enabled": true,
+      "limitation": "A region-port flow reduction at an observer can reflect demand or export visibility; it does not prove link loss or locate the root cause.",
+      "availability": "observed_in_current_detector_output",
+      "observed_event_count": 8,
+      "score_kind_any": [
+        "relative_change"
+      ],
+      "source_output": "outputs/netflow_anomalies/evidence_events.jsonl"
+    }
+  },
+  "event_name_to_family": {
+    "metric.cpu_up": "compute_load",
+    "metric.load_up": "compute_load",
+    "metric.memory_down": "memory_availability_drop",
+    "metric.disk_util_up": "disk_io_util_rise",
+    "metric.disk_rate_up": "disk_activity_rise",
+    "metric.disk_space_up": "disk_capacity_use_rise",
+    "metric.process_up": "process_count_rise",
+    "metric.interface_rate_up": "interface_load_rise",
+    "netflow.interface_bytes_up": "interface_load_rise",
+    "metric.interface_rate_down": "interface_volume_drop",
+    "netflow.interface_bytes_down": "interface_volume_drop",
+    "metric.route_change": "route_change",
+    "metric.bgp_down": "bgp_session_loss",
+    "metric.bgp_uptime_down": "bgp_session_loss",
+    "metric.bgp_prefix_down": "bgp_prefix_loss",
+    "metric.bgp_prefix_zero": "bgp_prefix_loss",
+    "log.bgp_session_reset": "bgp_reset_log",
+    "metric.ospf_cost_up": "ospf_cost_rise",
+    "log.ospf6_send_failure": "ospf_send_failure",
+    "netflow.ospf_control_down": "ospf_control_drop",
+    "netflow.ospf_control_up": "ospf_control_rise",
+    "netflow.bgp_control_up": "bgp_control_rise",
+    "netflow.regional_opposite_absent": "regional_return_absence",
+    "traffic.request_error_up": "probe_error",
+    "traffic.batch_timeout_up": "probe_timeout",
+    "traffic.latency_p95_up": "probe_latency",
+    "collection.node_scrape_up_zero": "collection_context",
+    "collection.node_scrape_error": "collection_context",
+    "collection.node_scrape_samples_down": "collection_context",
+    "collection.node_scrape_duration_up": "collection_context",
+    "collection.routing_scrape_up_zero": "collection_context",
+    "collection.routing_scrape_error": "collection_context",
+    "collection.routing_scrape_samples_down": "collection_context",
+    "collection.routing_scrape_duration_up": "collection_context",
+    "metric.route_absent_background": "persistent_background",
+    "traffic.latency_tail_up": "probe_latency",
+    "traffic.elephant_jitter_up": "probe_latency",
+    "traffic.elephant_loss_up": "probe_error",
+    "netflow.small_udp_packets_up": "interface_load_rise",
+    "netflow.region_port_bytes_down": "interface_volume_drop"
+  },
+  "family_salience": {
+    "compute_load": 0.4,
+    "memory_availability_drop": 0.38,
+    "disk_io_util_rise": 0.4,
+    "disk_activity_rise": 0.2,
+    "disk_capacity_use_rise": 0.35,
+    "process_count_rise": 0.3,
+    "interface_load_rise": 0.15,
+    "interface_volume_drop": 0.38,
+    "route_change": 0.5,
+    "bgp_session_loss": 0.78,
+    "bgp_prefix_loss": 0.55,
+    "bgp_reset_log": 0.68,
+    "ospf_cost_rise": 0.68,
+    "ospf_send_failure": 0.52,
+    "ospf_control_drop": 0.45,
+    "ospf_control_rise": 0.2,
+    "bgp_control_rise": 0.2,
+    "regional_return_absence": 0.5,
+    "probe_error": 0.72,
+    "probe_timeout": 0.72,
+    "probe_latency": 0.62,
+    "observation_gap": 0.38,
+    "collection_context": 0.0,
+    "persistent_background": 0.0
+  },
+  "same_family_relation": 0.72,
+  "unknown_family_relation": 0.15,
+  "family_relations": [
+    {
+      "family_a": "disk_activity_rise",
+      "family_b": "disk_io_util_rise",
+      "strength": 0.88,
+      "condition": "same_entity",
+      "lag_minutes": 3
+    },
+    {
+      "family_a": "compute_load",
+      "family_b": "process_count_rise",
+      "strength": 0.6,
+      "condition": "same_entity",
+      "lag_minutes": 3
+    },
+    {
+      "family_a": "memory_availability_drop",
+      "family_b": "process_count_rise",
+      "strength": 0.55,
+      "condition": "same_entity",
+      "lag_minutes": 3
+    },
+    {
+      "family_a": "compute_load",
+      "family_b": "probe_latency",
+      "strength": 0.42,
+      "condition": "target_region",
+      "lag_minutes": 5
+    },
+    {
+      "family_a": "disk_io_util_rise",
+      "family_b": "probe_latency",
+      "strength": 0.38,
+      "condition": "target_region",
+      "lag_minutes": 5
+    },
+    {
+      "family_a": "bgp_reset_log",
+      "family_b": "bgp_session_loss",
+      "strength": 0.9,
+      "condition": "same_router",
+      "lag_minutes": 3
+    },
+    {
+      "family_a": "bgp_session_loss",
+      "family_b": "bgp_prefix_loss",
+      "strength": 0.86,
+      "condition": "same_router",
+      "lag_minutes": 5
+    },
+    {
+      "family_a": "bgp_prefix_loss",
+      "family_b": "route_change",
+      "strength": 0.72,
+      "condition": "same_router",
+      "lag_minutes": 5
+    },
+    {
+      "family_a": "bgp_control_rise",
+      "family_b": "bgp_reset_log",
+      "strength": 0.36,
+      "condition": "same_router",
+      "lag_minutes": 3
+    },
+    {
+      "family_a": "ospf_send_failure",
+      "family_b": "ospf_control_drop",
+      "strength": 0.64,
+      "condition": "same_router",
+      "lag_minutes": 3
+    },
+    {
+      "family_a": "ospf_cost_rise",
+      "family_b": "route_change",
+      "strength": 0.7,
+      "condition": "same_router",
+      "lag_minutes": 5
+    },
+    {
+      "family_a": "ospf_control_rise",
+      "family_b": "ospf_send_failure",
+      "strength": 0.38,
+      "condition": "same_router",
+      "lag_minutes": 3
+    },
+    {
+      "family_a": "route_change",
+      "family_b": "regional_return_absence",
+      "strength": 0.55,
+      "condition": "same_region",
+      "lag_minutes": 5
+    },
+    {
+      "family_a": "interface_volume_drop",
+      "family_b": "regional_return_absence",
+      "strength": 0.58,
+      "condition": "same_router",
+      "lag_minutes": 3
+    },
+    {
+      "family_a": "regional_return_absence",
+      "family_b": "probe_error",
+      "strength": 0.72,
+      "condition": "flow_regions",
+      "lag_minutes": 5
+    },
+    {
+      "family_a": "regional_return_absence",
+      "family_b": "probe_timeout",
+      "strength": 0.72,
+      "condition": "flow_regions",
+      "lag_minutes": 5
+    },
+    {
+      "family_a": "probe_error",
+      "family_b": "probe_timeout",
+      "strength": 0.68,
+      "condition": "same_flow",
+      "lag_minutes": 3
+    },
+    {
+      "family_a": "probe_latency",
+      "family_b": "probe_timeout",
+      "strength": 0.76,
+      "condition": "same_flow",
+      "lag_minutes": 3
+    },
+    {
+      "family_a": "interface_load_rise",
+      "family_b": "compute_load",
+      "strength": 0.35,
+      "condition": "same_entity",
+      "lag_minutes": 3
+    }
+  ],
+  "region_edges": [
+    [
+      "beida",
+      "shenyang"
+    ],
+    [
+      "beida",
+      "xian"
+    ],
+    [
+      "beida",
+      "wuhan"
+    ],
+    [
+      "beida",
+      "shanghai"
+    ],
+    [
+      "shenyang",
+      "shanghai"
+    ],
+    [
+      "xian",
+      "wuhan"
+    ],
+    [
+      "xian",
+      "chengdu"
+    ],
+    [
+      "wuhan",
+      "chengdu"
+    ],
+    [
+      "wuhan",
+      "shanghai"
+    ],
+    [
+      "wuhan",
+      "nanjing"
+    ],
+    [
+      "wuhan",
+      "guangzhou"
+    ],
+    [
+      "shanghai",
+      "nanjing"
+    ],
+    [
+      "shanghai",
+      "guangzhou"
+    ]
+  ],
+  "topology_source": [
+    "docs/area.jpg",
+    "docs/topology.png",
+    "docs/system_metadata.md"
+  ]
+}

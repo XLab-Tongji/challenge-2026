@@ -1,6 +1,9 @@
 /models/
 /checkpoints/
 /outputs/
+.env
+.env.*
+!.env.example
 /dist/
 /build/
 *.safetensors
@@ -18,3 +21,4 @@ cache/
 *.pyc
 *.log
 *.egg-info/
+/data/

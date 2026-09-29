@@ -1,0 +1,15 @@
+{
+  "schema_version": 2,
+  "error_severities": ["err", "error", "fatal", "critical", "alert", "emerg", "panic"],
+  "warning_severities": ["warning", "warn"],
+  "obvious_keywords": ["[error] bgp read packet error", "connection reset by peer"],
+  "possible_keywords": ["sendmsg failed", "could not send entire message"],
+  "template_rules": [
+    {"name": "ospf6_spf_scheduled", "template_contains": "spf scheduled in", "level": "background", "feature": "ospf6_spf_scheduled", "dependency_family": "ospf6_spf"},
+    {"name": "ospf6_spf_processing", "template_contains": "spf processing # areas", "level": "background", "feature": "ospf6_spf_processing", "dependency_family": "ospf6_spf"},
+    {"name": "bgp_end_of_rib", "template_contains": "end-of-rib for ipv6 unicast", "level": "background", "feature": "bgp_end_of_rib", "dependency_family": "bgp_session"},
+    {"name": "ospf6_sendmsg_failed", "template_contains": "sendmsg failed ifindex", "level": "possible_anomaly", "feature": "ospf6_send_failure", "dependency_family": "ospf6_send_failure"},
+    {"name": "ospf6_message_incomplete", "template_contains": "could not send entire message", "level": "obvious_anomaly", "feature": "ospf6_send_failure", "dependency_family": "ospf6_send_failure"},
+    {"name": "bgp_session_reset", "template_contains": "bgp read packet error", "level": "obvious_anomaly", "feature": "bgp_session_reset", "dependency_family": "bgp_session_reset"}
+  ]
+}
